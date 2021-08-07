@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31410.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForceCombo", "ForceCombo.csproj", "{5EB538F3-F691-4306-B4A9-790E09F3562C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5EB538F3-F691-4306-B4A9-790E09F3562C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EB538F3-F691-4306-B4A9-790E09F3562C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EB538F3-F691-4306-B4A9-790E09F3562C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EB538F3-F691-4306-B4A9-790E09F3562C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {554432C6-32AA-4C46-95A7-CEE449B15D40}
+	EndGlobalSection
+EndGlobal
