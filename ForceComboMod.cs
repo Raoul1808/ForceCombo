@@ -13,11 +13,13 @@ namespace ForceCombo
     {
         public const string MOD_ID = "ForceCombo";
         public const string MOD_NAME = "Force Combo";
-        public const string MOD_VERSION = "1.1.0";
+        public const string MOD_VERSION = "1.2.0";
 
         public static BepInEx.Logging.ManualLogSource Logger;
 
         public static GameObject button;
+        public static GameObject checkbox;
+        public static Toggle checkboxMark;
 
         public override void Load()
         {
@@ -32,6 +34,7 @@ namespace ForceCombo
             static bool restartUponHit = false;
             static bool isRestarting = false;
             static bool isCustom = false;
+            static bool directRestart => checkboxMark.isOn;
             static ForceComboMode currentMode = ForceComboMode.None;
 
             [HarmonyPatch(typeof(Track), nameof(Track.LateUpdate))]
@@ -92,16 +95,31 @@ namespace ForceCombo
             }
 
             [HarmonyPatch(typeof(XDCustomLevelSelectMenu), nameof(XDCustomLevelSelectMenu.OpenMenu))]
-            [HarmonyPrefix]
+            [HarmonyPostfix]
             private static void CustomMenuOpen()
             {
                 isCustom = true;
             }
 
+            [HarmonyPatch(typeof(Track), nameof(Track.ReturnToPickTrack))]
+            [HarmonyPrefix]
+            private static void PreventRestart()
+            {
+                isRestarting = true;
+            }
+
+            [HarmonyPatch(typeof(Track), nameof(Track.FailSong))]
+            [HarmonyPostfix]
+            private static void InstantRestartTrack(Track __instance)
+            {
+                if (directRestart) __instance.RestartTrack();
+            }
+
             private static void Restart(PlayState state)
             {
                 isRestarting = true;
-                state.health = -50;
+                if (directRestart) Track.Instance.RestartTrack();
+                else state.health = -50;
             }
 
             [HarmonyPostfix]
@@ -118,14 +136,8 @@ namespace ForceCombo
             private static bool set_textPrefix(ref string value, TMP_Text __instance)
             {
                 if (value == null || __instance.text == null) return true;
-                if (__instance.name.ToLower().Contains("failed"))
-                {
-                    value = "Failed " + (restartOnPFCLoss ? "PFC" : (restartOnFCLoss ? "FC" : (restartUponHit ? "Hitless Song" : "Song")));
-                }
-                if (__instance.name.Contains("ForceComboModeButton"))
-                {
-                    value = "Mode: " + currentMode.ToString();
-                }
+                if (__instance.name.ToLower().Contains("failed")) value = "Failed " + (restartOnPFCLoss ? "PFC" : (restartOnFCLoss ? "FC" : (restartUponHit ? "Hitless Song" : "Song")));
+                if (__instance.name.Contains("ForceComboModeButton")) value = "Mode: " + currentMode.ToString();
                 return true;
             }
 
@@ -133,38 +145,26 @@ namespace ForceCombo
             [HarmonyPostfix]
             private static void AddButtonAndText(XDCustomLevelSelectMenu __instance)
             {
-
+                Transform parent = __instance.sortButton.transform.parent.parent.parent.parent;
                 button = UnityEngine.Object.Instantiate(__instance.sortButton.transform.parent.gameObject, __instance.transform.parent);
                 button.name = "ForceComboModeButton";
                 button.gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "Sample Text"; // For some reason removing this prevents the mod from changing the text
                 button.gameObject.GetComponentInChildren<TMP_Text>().name = "ForceComboModeButton";
-                button.gameObject.GetComponentInChildren<RectTransform>().SetParent(__instance.sortButton.transform.parent.parent.parent.parent);
+                button.gameObject.GetComponentInChildren<RectTransform>().SetParent(parent);
                 Button b = button.GetComponentInChildren<Button>();
                 b.interactable = true;
                 b.onClick.AddListener(new Action(ChangeMode));
+                button.gameObject.GetComponentInChildren<RectTransform>().anchorMin = new Vector2(4.02f, 2.6f);
+                button.gameObject.GetComponentInChildren<RectTransform>().anchorMax = new Vector2(4.02f, 2.6f); button.gameObject.GetComponentInChildren<RectTransform>().anchorMax = new Vector2(4.02f, 2.6f);
 
-                RectTransform rect = button.gameObject.GetComponentInChildren<RectTransform>();
-                rect.anchorMin = new Vector2(4.02f, 2.6f);
-                rect.anchorMax = new Vector2(4.02f, 2.6f);
+                checkbox = UnityEngine.Object.Instantiate(__instance.favouriteToggleOnContextMenu.gameObject, __instance.transform.parent);
+                checkbox.gameObject.GetComponentInChildren<RectTransform>().SetParent(parent);
+                checkbox.gameObject.GetComponentInChildren<RectTransform>().anchorMin = new Vector2(4.360005f, 2.639998f);
+                checkbox.gameObject.GetComponentInChildren<RectTransform>().anchorMax = new Vector2(4.360005f, 2.639998f);
+                checkboxMark = checkbox.gameObject.GetComponentInChildren<Toggle>();
             }
-
-            //[HarmonyPatch(typeof(XDLevelSelectMenuBase), nameof(XDLevelSelectMenuBase.Update))]
-            //[HarmonyPostfix]
-            //private static void MoveButton()
-            //{
-            //    RectTransform rect = button.gameObject.GetComponentInChildren<RectTransform>();
-            //    float x = 0f;
-            //    float y = 0f;
-            //    if (Input.GetKey(KeyCode.I)) y += 0.01f;
-            //    if (Input.GetKey(KeyCode.J)) x -= 0.01f;
-            //    if (Input.GetKey(KeyCode.K)) y -= 0.01f;
-            //    if (Input.GetKey(KeyCode.L)) x += 0.01f;
-            //    rect.anchorMin = new Vector2(rect.anchorMin.x + x, rect.anchorMin.y + y);
-            //    rect.anchorMax = new Vector2(rect.anchorMax.x + x, rect.anchorMax.y + y);
-            //    if (Input.GetKeyDown(KeyCode.N)) Logger.LogMessage(rect.anchorMin.x.ToString() + " " + rect.anchorMin.y.ToString());
-            //}
         }
-        
+
         public enum ForceComboMode
         {
             None,
