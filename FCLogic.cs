@@ -6,7 +6,7 @@ namespace ForceCombo
     {
         private static bool isRestarting = false;
 
-        [HarmonyPatch(typeof(Track), nameof(Track.LateUpdate))]
+        [HarmonyPatch(typeof(Track), "LateUpdate")]
         [HarmonyPostfix]
         private static void ForceComboMainLogic()
         {
