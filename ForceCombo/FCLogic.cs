@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using UnityEngine;
 
 namespace ForceCombo
 {
@@ -10,9 +11,8 @@ namespace ForceCombo
         [HarmonyPostfix]
         private static void ForceComboMainLogic()
         {
-            if (isRestarting || !(Main.InCustoms || Main.InArcade) || Track.IsEditing || Track.IsPaused || Track.Instance.playStateFirst.isInPracticeMode) return;
-
-            PlayState playState = Track.Instance.playStateFirst;
+            if (isRestarting || Track.PlayStates.Length == 0) return;
+            PlayState playState = Track.PlayStates[0];
 
             switch (Main.ForceComboState)
             {
@@ -25,7 +25,7 @@ namespace ForceCombo
                         Restart();
                     break;
                 case ForceComboMode.PFC:
-                    if (playState.fullComboState != FullComboState.PerfectFullCombo)
+                    if (playState.fullComboState < FullComboState.Perfect)
                         Restart();
                     break;
             }
@@ -33,13 +33,16 @@ namespace ForceCombo
 
         private static void Restart()
         {
+            if (Track.PlayStates.Length == 0) return;
             isRestarting = true;
             if (Main.InstantRestart)
             {
-                Track.Instance.RestartTrack();
+                Track.RestartTrack();
                 return;
             }
-            Track.Instance.playStateFirst.health = -50;
+
+            Track.PlayStates[0].health = -50;
+            Track.FailSong();
         }
 
         [HarmonyPatch(typeof(Track), nameof(Track.PlayTrack))]
@@ -54,7 +57,7 @@ namespace ForceCombo
         private static void FailSong()
         {
             if (Main.InstantRestart)
-                Track.Instance.RestartTrack();
+                Track.RestartTrack();
         }
 
         [HarmonyPatch(typeof(Track), nameof(Track.ReturnToPickTrack))]
@@ -62,6 +65,27 @@ namespace ForceCombo
         private static void PreventRestart()
         {
             isRestarting = true;
+        }
+
+        [HarmonyPatch(typeof(Track), nameof(Track.Update))]
+        [HarmonyPostfix]
+        private static void SwitchForceComboState()
+        {
+            if (Input.GetKeyDown(KeyCode.F5))
+            {
+                Main.ForceComboState++;
+                if (Main.ForceComboState > ForceComboMode.PFC)
+                {
+                    Main.ForceComboState = ForceComboMode.None;
+                }
+                NotificationSystemGUI.AddMessage("Force Combo Mode: " + Main.ForceComboState);
+            }
+
+            if (Input.GetKeyDown(KeyCode.F6))
+            {
+                Main.InstantRestart = !Main.InstantRestart;
+                NotificationSystemGUI.AddMessage("Force Combo Instant Restart is currently " + (Main.InstantRestart ? "Enabled" : "disabled"));
+            }
         }
     }
 }
