@@ -3,15 +3,15 @@ using UnityEngine;
 
 namespace ForceCombo
 {
-    public class FCLogic
+    public class FcPatches
     {
-        private static bool isRestarting = false;
+        private static bool _isRestarting = false;
 
         [HarmonyPatch(typeof(Track), "LateUpdate")]
         [HarmonyPostfix]
         private static void ForceComboMainLogic()
         {
-            if (isRestarting || Track.PlayStates.Length == 0) return;
+            if (_isRestarting || Track.PlayStates.Length == 0) return;
             PlayState playState = Track.PlayStates[0];
 
             switch (Main.ForceComboState)
@@ -34,7 +34,7 @@ namespace ForceCombo
         private static void Restart()
         {
             if (Track.PlayStates.Length == 0) return;
-            isRestarting = true;
+            _isRestarting = true;
             if (Main.InstantRestart)
             {
                 Track.RestartTrack();
@@ -49,7 +49,7 @@ namespace ForceCombo
         [HarmonyPostfix]
         private static void ForceComboResetValues()
         {
-            isRestarting = false;
+            _isRestarting = false;
         }
 
         [HarmonyPatch(typeof(Track), nameof(Track.FailSong))]
@@ -64,7 +64,7 @@ namespace ForceCombo
         [HarmonyPrefix]
         private static void PreventRestart()
         {
-            isRestarting = true;
+            _isRestarting = true;
         }
 
         [HarmonyPatch(typeof(Track), nameof(Track.Update))]
@@ -84,7 +84,7 @@ namespace ForceCombo
             if (Input.GetKeyDown(KeyCode.F6))
             {
                 Main.InstantRestart = !Main.InstantRestart;
-                NotificationSystemGUI.AddMessage("Force Combo Instant Restart is currently " + (Main.InstantRestart ? "Enabled" : "disabled"));
+                NotificationSystemGUI.AddMessage("Force Combo Instant Restart: " + (Main.InstantRestart ? "Enabled" : "Disabled"));
             }
         }
     }
