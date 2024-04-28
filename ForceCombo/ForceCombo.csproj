@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="0Harmony">
+        <Reference Include="0Harmony" Publicize="true">
             <HintPath>..\srxd-dir\BepInEx\core\0Harmony.dll</HintPath>
         </Reference>
         <Reference Include="Assembly-CSharp">
@@ -28,6 +28,13 @@
         <Reference Include="UnityEngine.InputLegacyModule">
           <HintPath>..\srxd-dir\SpinRhythm_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
         </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
     <Target Name="PostBuildScript" AfterTargets="AfterBuild">

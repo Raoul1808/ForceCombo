@@ -6,12 +6,13 @@ namespace ForceCombo
     public class FcPatches
     {
         private static bool _isRestarting = false;
+        private static bool _inEditor = false;
 
         [HarmonyPatch(typeof(Track), "LateUpdate")]
         [HarmonyPostfix]
         private static void ForceComboMainLogic()
         {
-            if (_isRestarting || Track.PlayStates.Length == 0) return;
+            if (_inEditor || _isRestarting || Track.PlayStates.Length == 0 || Track.PlayStates[0].isInPracticeMode) return;
             PlayState playState = Track.PlayStates[0];
 
             switch (Main.ForceComboState)
@@ -50,6 +51,21 @@ namespace ForceCombo
         private static void ForceComboResetValues()
         {
             _isRestarting = false;
+            _inEditor = false;
+        }
+
+        [HarmonyPatch(typeof(Track), nameof(Track.OnEditingTrackBecameActive))]
+        [HarmonyPostfix]
+        private static void SetEditingFlag()
+        {
+            _inEditor = true;
+        }
+
+        [HarmonyPatch(typeof(Track), nameof(Track.PauseGame))]
+        [HarmonyPrefix]
+        private static bool PreventPauseWhenRestarting()
+        {
+            return !_isRestarting;
         }
 
         [HarmonyPatch(typeof(Track), nameof(Track.FailSong))]
@@ -71,6 +87,7 @@ namespace ForceCombo
         [HarmonyPostfix]
         private static void SwitchForceComboState()
         {
+            if (Track.IsPlaying || Track.IsPaused ||  Track.IsEditing) return;
             if (Input.GetKeyDown(KeyCode.F5))
             {
                 Main.ForceComboState++;
