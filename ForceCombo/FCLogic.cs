@@ -87,5 +87,13 @@ namespace ForceCombo
                 NotificationSystemGUI.AddMessage("Force Combo Instant Restart: " + (Main.InstantRestart ? "Enabled" : "Disabled"));
             }
         }
+
+        [HarmonyPatch(typeof(Track), "Awake")]
+        [HarmonyPostfix]
+        private static void ShowForceComboInfo()
+        {
+            NotificationSystemGUI.AddMessage("Press F5 to change Force Combo state");
+            NotificationSystemGUI.AddMessage("Press F6 to toggle Instant Restart");
+        }
     }
 }
