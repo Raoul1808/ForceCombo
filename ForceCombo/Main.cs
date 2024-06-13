@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Globalization;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -19,6 +20,7 @@ namespace ForceCombo
 
         public static ForceComboMode ForceComboState = ForceComboMode.None;
         public static bool InstantRestart = false;
+        public static float TargetAccuracy = 0f;
 
         void Awake()
         {
@@ -51,6 +53,15 @@ namespace ForceCombo
                     "ForceCombo_InstantRestart",
                     false,
                     v => InstantRestart = v
+                );
+                UIHelper.CreateMultiChoiceButton(
+                    section.Transform,
+                    "ForceComboAccuracy",
+                    "ForceCombo_TargetAccuracy",
+                    0,
+                    v => TargetAccuracy = v / 1000f,
+                    () => new IntRange(0, 1001),
+                    v => decimal.Divide(v, 10).ToString(CultureInfo.InvariantCulture) + "%"
                 );
             });
         }

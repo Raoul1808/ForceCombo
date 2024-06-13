@@ -7,5 +7,8 @@
   },
   "ForceCombo_InstantRestart": {
     "en": "Instant Restart"
+  },
+  "ForceCombo_TargetAccuracy": {
+    "en": "Target Accuracy"
   }
 }

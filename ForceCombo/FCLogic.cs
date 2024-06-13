@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 
 namespace ForceCombo
 {
@@ -13,6 +14,14 @@ namespace ForceCombo
         {
             if (_inEditor || _isRestarting || Track.PlayStates.Length == 0 || Track.PlayStates[0].isInPracticeMode) return;
             PlayState playState = Track.PlayStates[0];
+
+            float maxAchievableAccuracy = GetMaxAccuracy(playState);
+            Main.Log("Max Achievable Accuracy: " + Math.Round(maxAchievableAccuracy * 1000) / 10 + "%");
+            if (Main.TargetAccuracy > maxAchievableAccuracy)
+            {
+                Restart();
+                return;
+            }
 
             switch (Main.ForceComboState)
             {
@@ -29,6 +38,18 @@ namespace ForceCombo
                         Restart();
                     break;
             }
+        }
+
+        private static float GetMaxAccuracy(PlayState playState)
+        {
+            float accuracy = 0f;
+            int sectionCount = playState.trackData.EditorTrackCuePoints.Count - 1;
+            for (int i = 0; i < sectionCount; i++)
+            {
+                (int currentScore, int maxPotentialScore, int maxScore) = playState.GetCurrentTotalsForPracticeSection(i);
+                accuracy += (float)maxPotentialScore / maxScore;
+            }
+            return accuracy / sectionCount;
         }
 
         private static void Restart()
