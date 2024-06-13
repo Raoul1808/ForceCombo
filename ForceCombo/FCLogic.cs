@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using UnityEngine;
 
 namespace ForceCombo
 {
@@ -81,36 +80,6 @@ namespace ForceCombo
         private static void PreventRestart()
         {
             _isRestarting = true;
-        }
-
-        [HarmonyPatch(typeof(Track), nameof(Track.Update))]
-        [HarmonyPostfix]
-        private static void SwitchForceComboState()
-        {
-            if (Track.IsPlaying || Track.IsPaused ||  Track.IsEditing) return;
-            if (Input.GetKeyDown(KeyCode.F5))
-            {
-                Main.ForceComboState++;
-                if (Main.ForceComboState > ForceComboMode.PFC)
-                {
-                    Main.ForceComboState = ForceComboMode.None;
-                }
-                NotificationSystemGUI.AddMessage("Force Combo Mode: " + Main.ForceComboState);
-            }
-
-            if (Input.GetKeyDown(KeyCode.F6))
-            {
-                Main.InstantRestart = !Main.InstantRestart;
-                NotificationSystemGUI.AddMessage("Force Combo Instant Restart: " + (Main.InstantRestart ? "Enabled" : "Disabled"));
-            }
-        }
-
-        [HarmonyPatch(typeof(Track), "Awake")]
-        [HarmonyPostfix]
-        private static void ShowForceComboInfo()
-        {
-            NotificationSystemGUI.AddMessage("Press F5 to change Force Combo state");
-            NotificationSystemGUI.AddMessage("Press F6 to toggle Instant Restart");
         }
     }
 }
